@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A Friday Evening in December — Interactive Story</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600&family=Crimson+Pro:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Great+Vibes&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['"Cormorant Garamond"', 'serif'],
+            script: ['"Great Vibes"', 'cursive'],
+            body: ['"Crimson Pro"', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            rosewood: {
+              950: '#0d0406',
+              900: '#1a070c',
+              800: '#2d0c16',
+              700: '#4a1223',
+              500: '#9e2a47',
+              400: '#d44d6e',
+              300: '#f08cae',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #0d0406;
+      color: #f5e6e8;
+      overflow-x: hidden;
+    }
+
+    /* Ambient Background Glow */
+    .ambient-glow {
+      background: radial-gradient(circle at 50% 15%, rgba(158, 42, 71, 0.25) 0%, rgba(45, 12, 22, 0.12) 45%, rgba(13, 4, 6, 0.98) 90%);
+    }
+
+    /* Glassmorphism Container */
+    .glass-card {
+      background: rgba(26, 7, 12, 0.65);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(212, 77, 110, 0.18);
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.85), 0 0 40px rgba(158, 42, 71, 0.12);
+    }
+
+    /* Editorial Drop Cap */
+    .drop-cap::first-letter {
+      font-family: 'Cormorant Garamond', serif;
+      float: left;
+      font-size: 4.5rem;
+      line-height: 0.8;
+      padding-top: 6px;
+      padding-right: 14px;
+      padding-bottom: 4px;
+      color: #f08cae;
+      font-weight: 600;
+      text-shadow: 0 0 20px rgba(240, 140, 174, 0.4);
+    }
+
+    /* Dialogue Highlight Styling */
+    .dialogue {
+      font-style: italic;
+      color: #ffd6e0;
+      text-shadow: 0 0 12px rgba(212, 77, 110, 0.25);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0d0406;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #4a1223;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9e2a47;
+    }
+
+    /* Subtle Fade-in Animation */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body class="ambient-glow min-h-screen selection:bg-rosewood-500 selection:text-white relative">
+
+  <!-- Reading Progress Bar -->
+  <div class="fixed top-0 left-0 w-full h-1 z-50 bg-rosewood-900">
+    <div id="progress-bar" class="h-full bg-gradient-to-r from-rosewood-500 via-rose-400 to-amber-300 w-0 transition-all duration-150"></div>
+  </div>
+
+  <!-- Floating Particles Canvas -->
+  <canvas id="ember-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-60"></canvas>
+
+  <!-- Floating Control Bar -->
+  <nav class="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-2.5 rounded-full glass-card font-sans text-xs tracking-wider uppercase text-rose-200/80">
+    <button onclick="adjustFontSize(-1)" class="hover:text-white px-2 py-1 transition" title="Decrease Font Size">A-</button>
+    <span class="text-rosewood-500">|</span>
+    <button onclick="adjustFontSize(1)" class="hover:text-white px-2 py-1 transition" title="Increase Font Size">A+</button>
+    <span class="text-rosewood-500">|</span>
+    <button id="glow-toggle" onclick="toggleGlow()" class="hover:text-white px-2 py-1 transition flex items-center gap-1.5">
+      <span class="w-2 h-2 rounded-full bg-rose-400 animate-pulse"></span>
+      Mood
+    </button>
+  </nav>
+
+  <!-- Main Story Container -->
+  <main class="relative z-10 max-w-3xl mx-auto px-5 sm:px-8 pt-16 pb-28">
+    
+    <!-- Story Header -->
+    <header class="text-center mb-14 reveal active">
+      <p class="font-script text-3xl sm:text-4xl text-rosewood-300 mb-2 tracking-wide">
+        Confessions after dusk
+      </p>
+      <h1 class="font-display text-4xl sm:text-6xl font-semibold tracking-tight text-white leading-none mb-6">
+        The Rose Red Saree
+      </h1>
+      <div class="flex items-center justify-center gap-4 text-rose-300/60 font-sans text-xs uppercase tracking-[0.25em]">
+        <span>Mumbai</span>
+        <span class="text-rosewood-400">•</span>
+        <span>December Evening</span>
+        <span class="text-rosewood-400">•</span>
+        <span>Part I</span>
+      </div>
+      <div class="mt-8 flex justify-center">
+        <div class="w-28 h-[1px] bg-gradient-to-r from-transparent via-rosewood-400 to-transparent"></div>
+      </div>
+    </header>
+
+    <!-- Glassmorphic Story Sheet -->
+    <article id="story-content" class="glass-card rounded-3xl p-7 sm:p-14 font-body text-xl sm:text-[1.35rem] leading-[1.85] text-rose-50/90 space-y-7 transition-all duration-300">
+      
+      <p class="drop-cap reveal">
+        Hi all and hope you are doing good. I am Rahul, 27 years old, living in Mumbai with my family. Bringing you here the detailed story of my 1st sexy experience with a MILF. I hope you will enjoy this one. Without wasting much time let's get started.
+      </p>
+
+      <p class="reveal">
+        This happened about a year ago. I was staying with my family in this nice apartment. My mom's close friend and our long-term family friend, Mrs. Deepali, was also staying in our adjacent housing society with her family. Our families are close friends and we used to see each other frequently, and in fact, we have done some family trips together.
+      </p>
+
+      <p class="reveal">
+        This year her daughter Divya passed her 12th, with some low scores on her mark sheet; the family, including Mrs. Deepali, was a bit tensed since the last one month. Finally, her daughter managed to secure a seat in another state and things were settling down now. She being the only child, Deepa aunty is a bit sad now that she has to leave the town. Finally, in the month of Sept, she left for her college as we all went by to wish her good luck. I clearly see Deepa aunty is a bit sad and feeling different from her expression, but acts calm and happy as her daughter is finally getting into college.
+      </p>
+
+      <p class="reveal">
+        After her daughter went, a few days pass by. Deepa aunty used to visit our home sometimes when she felt lonely to talk with my mom, and our family has a good rapport so sometimes I used to walk to their house as well to give or take some stuff.
+      </p>
+
+      <!-- Stylized Character Note -->
+      <div class="reveal my-8 p-6 rounded-2xl bg-rosewood-900/60 border-l-2 border-rosewood-400 font-display italic text-2xl text-rose-200/95 shadow-inner">
+        For your information, Deepa aunty was 41 and having a slightly chubby figure with a height of 5 feet. She has average fair skin with 36 boobs, medium-length hair till her lower back, and looks pretty nice in her 40s too.
+      </div>
+
+      <p class="reveal">
+        It was December now and Uncle decided to visit Divya's college to bring her back for some days. It was Friday evening, 7 PM, when my mom asked me to hand over some food stuff she made to Deepa aunty as I was going down to meet my friends. I grab the bag and walk downstairs in my trousers and grey t-shirt. I walk into my adjacent building and headed to Deepa Aunty's home and rang the doorbell.
+      </p>
+
+      <p class="reveal">
+        Deepa aunty opened the door pretty quick and welcomed me with a smile. <span class="dialogue">"Hey Rahul, come in... What did you bring now, haan?"</span> she asks with a smile, but I notice something different from her face. Looks like she cried recently.
+      </p>
+
+      <p class="reveal">
+        I walk in slowly and hand over her the bag. <span class="dialogue">"Don't know, mom made something as usual and asked me to hand over,"</span> I smile, standing just inside the door.
+      </p>
+
+      <p class="reveal">
+        Deepa aunty keeps the bag on the dining table and turned back; she was in her <span class="text-rose-300 font-medium border-b border-rose-400/40">rose red saree</span>. <span class="dialogue">"Why are you standing, please sit... Tell me what you will take,"</span> she asks.
+      </p>
+
+      <p class="reveal">
+        I walk to the couch and sit. <span class="dialogue">"Nothing aunty, I am good... Maybe just will give you company while my friends still come, late as usual,"</span> I added.
+      </p>
+
+      <p class="reveal">
+        <span class="dialogue">"Haha yes, I think then it's better if they get late... anyways I was feeling alone,"</span> she added softly.
+      </p>
+
+      <p class="reveal">
+        I just sit back and look at her; her innocent and beautiful face was looking a bit tensed since a few days. <span class="dialogue">"You can call me anytime, aunty,"</span> I said and took a pause. I gave her eye contact and added, <span class="dialogue">"Aunty, is everything ok?"</span>
+      </p>
+
+      <p class="reveal">
+        She just stayed quiet for a moment and says, <span class="dialogue">"Yes, yes... All good."</span>
+      </p>
+
+      <p class="reveal">
+        I smile and asked, <span class="dialogue">"I mean, I have seen you a bit tensed since Divya left, you are a bit dull so thought of asking. You can always tell us if you need anything, we are like family, isn't it?"</span>
+      </p>
+
+      <p class="reveal">
+        Aunty now smiled back and with a bit wet eyes she added in a slow tone, <span class="dialogue">"Yes Rahul, thanks... It's just I miss her a lot and sometimes things between uncle and me don't go well... Sometimes he blames me for her this college and all, so it's just I am getting—"</span> she suddenly stopped.
+      </p>
+
+      <!-- Ornamental Divider -->
+      <div class="reveal flex items-center justify-center py-4 opacity-60">
+        <span class="text-rosewood-400 text-2xl">✦ ✧ ✦</span>
+      </div>
+
+      <p class="reveal">
+        I now move closer to her as I gently took her hand in mine. <span class="dialogue">"Hey, you don't need to take that much stress, she is in a good college now and you have done your best,"</span> I added as I feel her soft hands for the first time.
+      </p>
+
+      <p class="reveal">
+        <span class="dialogue">"Thanks Rahul, don't know, but thoughts keep coming to my mind... Am I good enough, am I doing my part right or not,"</span> she added with a bit of a helpless tone as her hands are still in my hand.
+      </p>
+
+      <p class="reveal">
+        I move more closer to her now. <span class="dialogue">"Aunty.... Don't think like that... You know you are the best I have ever seen... You are so loving and caring,"</span> gently rubbing her hands, I added.
+      </p>
+
+      <p class="reveal">
+        Aunty stays quiet, but just looks at me with tears in her eyes. <span class="dialogue">"I don't know... But you are really making me feel better now,"</span> she added.
+      </p>
+
+      <p class="reveal">
+        This was the first time I noticed her with a different perspective—that innocent beautiful face and curvy mature body, and her current situation making me feel more for her. I slowly move my hand on her cheek. <span class="dialogue">"You don't need to cry aunty, you are so nice and beautiful.. you just deserve to be happy,"</span> I added.
+      </p>
+
+      <p class="reveal">
+        Aunty smiled back now, clearing her tears. <span class="dialogue">"Thanks Rahul... You are really good... I wish uncle understood me like this,"</span> she murmured.
+      </p>
+
+      <p class="reveal">
+        <span class="dialogue">"Ohhh let it be, we all know his nature, and I am there to make u feel good, isn't it?"</span> I added, moving close as both my hands were on her cheek now.. looking in her eyes.
+      </p>
+
+      <p class="reveal">
+        Aunty was looking at me without saying a word as I touched her like this for the first time, but didn't oppose me as well.
+      </p>
+
+      <p class="reveal">
+        I just softly take her close and gave her a hug sitting on the couch. <span class="dialogue">"Don't worry aunty, everything will be alright ... It's just a matter of time,"</span> I added as my hands are on her back as I feel her close.
+      </p>
+
+      <p class="reveal">
+        Aunty hugged me back now and I can clearly feel her soft boobs against me now, which is making me more attracted towards her now. <span class="dialogue">"You are so beautiful, aunty,"</span> I added, tightening my hug as my lips brush her neck.
+      </p>
+
+      <p class="reveal">
+        Aunty just hugged me back and whispered, <span class="dialogue">"Thanks dear... You always make me feel good."</span> Her hands were around my neck now.
+      </p>
+
+      <p class="reveal">
+        <span class="dialogue">"Aunty, you actually deserve a lot of happiness.... You are so nice... I always admire you, aunty,"</span> I added as I kiss on her neck now. <span class="dialogue">"Mmmm....."</span>
+      </p>
+
+      <p class="reveal">
+        Aunty felt a bit hesitant now. <span class="dialogue">"Ahhhh Rahul.... thanks, but—"</span> she tried a bit to move out of my hug.
+      </p>
+
+      <p class="reveal">
+        I move my one hand from her back and with one on her face as I looked in her eyes and added, <span class="dialogue">"Sshhh, I just want to make you feel good, aunty... I have seen you so tensed since the last few months,"</span> I added, moving my lips close to hers.
+      </p>
+
+      <p class="reveal">
+        Aunty stays quiet and closes her eyes as we come close, and I softly kiss her lips, pulling her close gently. <span class="dialogue">"Ummm.... Aunty, don't be so stressed... Just relax,"</span> I kiss and gently rub her back through her saree.
+      </p>
+
+      <p class="reveal">
+        Aunty kissed me back now, closing her eyes, and sooner we start kissing each other passionately as if we are lovers.
+      </p>
+
+      <p class="reveal">
+        My hands were moving all over her back and the side of her boobs as she is feeling my face with her hands.. <span class="dialogue">"Ummm Rahul... I never thought this... This is.... ummm."</span>
+      </p>
+
+      <p class="reveal">
+        I keep kissing her, pulling her on my lap now as I added, <span class="dialogue">"Aunty, don't think so much... It's only us... Ummm."</span>
+      </p>
+
+      <!-- Ornamental Divider -->
+      <div class="reveal flex items-center justify-center py-4 opacity-60">
+        <span class="text-rosewood-400 text-2xl">✦ ✧ ✦</span>
+      </div>
+
+      <p class="reveal">
+        We kissed for about 10 minutes and then I looked in her eyes as she stopped in between. <span class="dialogue">"Rahul... This is wrong ... We should not do this... I am sorry ..."</span> She stood up.
+      </p>
+
+      <p class="reveal">
+        By now I am pretty turned on; I also stood up and went close to her... <span class="dialogue">"Aunty, believe me, you need this..."</span> I added, standing closer to her in front of her.
+      </p>
+
+      <p class="reveal">
+        <span class="dialogue">"But Rahul... I have never cheated on Divya's dad... I am lonely, but don't know if we should..."</span> She took a pause... <span class="dialogue">"Your friends must be waiting..."</span>
+      </p>
+
+      <p class="reveal">
+        I hold her hands and kiss them. <span class="dialogue">"I just want to be a friend to you which you need now..."</span> I added, moving her hair from her forehead. <span class="dialogue">"Didn't you like what we did?"</span>
+      </p>
+
+      <p class="reveal">
+        Aunty looked at me and added, <span class="dialogue">"I liked it, but it's just..."</span> I put my finger on her lips as I added, <span class="dialogue">"Then just let it happen, Aunty... How about tonight at 10 ... So that I can be here for you the whole night,"</span> I added, pulling her close.
+      </p>
+
+      <p class="reveal">
+        Aunty smiled with a bit of confusion now.. but finally nodded her head. <span class="dialogue">"But pls make sure this stays between us,"</span> and she hugged me.
+      </p>
+
+      <p class="reveal">
+        <span class="dialogue">"Sure aunty... I just want to make you feel good... Because you deserve it,"</span> and I kiss her forehead. <span class="dialogue">"I will catch you at 10 then..."</span> I smile and leave as I am getting calls from my friends, and I want to spend a longer time with her.
+      </p>
+
+      <!-- Footer Sign-off inside Card -->
+      <div class="pt-10 text-center reveal">
+        <p class="font-script text-4xl text-rosewood-300">To be continued at 10 PM...</p>
+      </div>
+
+    </article>
+  </main>
+
+  <script>
+    // 1. Scroll Progress Bar & Reveal Animations
+    const progressBar = document.getElementById('progress-bar');
+    const reveals = document.querySelectorAll('.reveal');
+
+    function handleScroll() {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = (scrollTop / docHeight) * 100;
+      progressBar.style.width = `${progress}%`;
+
+      reveals.forEach((el) => {
+        const top = el.getBoundingClientRect().top;
+        if (top < window.innerHeight - 60) {
+          el.classList.add('active');
+        }
+      });
+    }
+
+    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('load', handleScroll);
+
+    // 2. Dynamic Font Size Controls
+    let currentScale = 1;
+    const storyArticle = document.getElementById('story-content');
+
+    function adjustFontSize(direction) {
+      currentScale = Math.min(1.35, Math.max(0.85, currentScale + direction * 0.08));
+      storyArticle.style.fontSize = `${currentScale * 1.35}rem`;
+    }
+
+    // 3. Ambient Mood Lighting Toggle
+    let intenseGlow = true;
+    const canvasEl = document.getElementById('ember-canvas');
+
+    function toggleGlow() {
+      intenseGlow = !intenseGlow;
+      canvasEl.style.opacity = intenseGlow ? '0.6' : '0.15';
+      storyArticle.style.boxShadow = intenseGlow
+        ? '0 25px 60px -15px rgba(0, 0, 0, 0.85), 0 0 55px rgba(212, 77, 110, 0.25)'
+        : '0 25px 60px -15px rgba(0, 0, 0, 0.85)';
+    }
+
+    // 4. Floating Romantic Embers / Rose Petals Canvas
+    const ctx = canvasEl.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+      canvasEl.width = window.innerWidth;
+      canvasEl.height = window.innerHeight;
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Ember {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * canvasEl.width;
+        this.y = canvasEl.height + Math.random() * 100;
+        this.size = Math.random() * 2.8 + 0.8;
+        this.speedY = Math.random() * 0.6 + 0.2;
+        this.speedX = (Math.random() - 0.5) * 0.4;
+        this.alpha = Math.random() * 0.65 + 0.15;
+        this.color = Math.random() > 0.4 ? '240, 140, 174' : '212, 77, 110';
+      }
+      update() {
+        this.y -= this.speedY;
+        this.x += this.speedX + Math.sin(this.y * 0.01) * 0.2;
+        if (this.y < -10) this.reset();
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${this.color}, ${this.alpha})`;
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = `rgba(${this.color}, 0.8)`;
+        ctx.fill();
+      }
+    }
+
+    for (let i = 0; i < 45; i++) {
+      const p = new Ember();
+      p.y = Math.random() * canvasEl.height;
+      particles.push(p);
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+      particles.forEach((p) => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+  </script>
+</body>
+</html>
