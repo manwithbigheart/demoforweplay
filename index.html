@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>A Friday Evening in December — Interactive Story</title>
+  <title>Private Confession — For Nidhi & Ava</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -48,16 +48,16 @@
 
     /* Ambient Background Glow */
     .ambient-glow {
-      background: radial-gradient(circle at 50% 15%, rgba(158, 42, 71, 0.25) 0%, rgba(45, 12, 22, 0.12) 45%, rgba(13, 4, 6, 0.98) 90%);
+      background: radial-gradient(circle at 50% 15%, rgba(158, 42, 71, 0.28) 0%, rgba(45, 12, 22, 0.14) 45%, rgba(13, 4, 6, 0.98) 90%);
     }
 
     /* Glassmorphism Container */
     .glass-card {
-      background: rgba(26, 7, 12, 0.65);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border: 1px solid rgba(212, 77, 110, 0.18);
-      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.85), 0 0 40px rgba(158, 42, 71, 0.12);
+      background: rgba(26, 7, 12, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(212, 77, 110, 0.22);
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.85), 0 0 40px rgba(158, 42, 71, 0.15);
     }
 
     /* Editorial Drop Cap */
@@ -106,9 +106,19 @@
       opacity: 1;
       transform: translateY(0);
     }
+
+    /* Shake Animation for Wrong Code */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+    .shake {
+      animation: shake 0.4s ease-in-out;
+    }
   </style>
 </head>
-<body class="ambient-glow min-h-screen selection:bg-rosewood-500 selection:text-white relative">
+<body class="ambient-glow min-h-screen selection:bg-rosewood-500 selection:text-white relative overflow-hidden" id="page-body">
 
   <!-- Reading Progress Bar -->
   <div class="fixed top-0 left-0 w-full h-1 z-50 bg-rosewood-900">
@@ -118,8 +128,68 @@
   <!-- Floating Particles Canvas -->
   <canvas id="ember-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-60"></canvas>
 
+  <!-- ========================================== -->
+  <!-- PRIVATE LOCK SCREEN OVERLAY (NIDHI & AVA)  -->
+  <!-- ========================================== -->
+  <div id="lock-screen" class="fixed inset-0 z-50 flex items-center justify-center px-4 bg-rosewood-950/85 backdrop-blur-2xl transition-all duration-700">
+    <div id="lock-card" class="glass-card max-w-md w-full rounded-3xl p-8 sm:p-10 text-center relative overflow-hidden border border-rose-400/30">
+      
+      <!-- Decorative Top Glow -->
+      <div class=" -top-20 left-1/2 -translate-x-1/2 w-44 h-44 bg-rosewood-500/30 rounded-full blur-3xl pointer-events-none"></div>
+
+      <!-- Wax Seal / Lock Icon -->
+      <div class="w-16 h-16 mx-auto mb-5 rounded-full bg-gradient-to-br from-rosewood-500 to-rosewood-800 border border-rose-300/40 flex items-center justify-center shadow-lg shadow-rosewood-500/30">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-rose-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+        </svg>
+      </div>
+
+      <p class="font-script text-3xl text-rosewood-300 mb-1">A Private Invitation</p>
+      
+      <h2 class="font-display text-3xl sm:text-4xl font-semibold text-white tracking-wide mb-4">
+        For <span class="text-rose-300 underline decoration-rosewood-500/60 underline-offset-8">Nidhi</span> &amp; <span class="text-rose-300 underline decoration-rosewood-500/60 underline-offset-8">Ava</span>
+      </h2>
+
+      <p class="font-body text-lg text-rose-100/80 leading-relaxed mb-6">
+        This intimate story is locked and reserved exclusively for <strong class="text-rose-200 font-semibold">Nidhi</strong> and <strong class="text-rose-200 font-semibold">Ava</strong>. Please enter the secret code below to unlock and read the article.
+      </p>
+
+      <!-- Passcode Form -->
+      <form onsubmit="unlockStory(event)" class="space-y-4">
+        <div class="relative">
+          <input 
+            type="password" 
+            id="passcode-input" 
+            placeholder="Enter secret code..." 
+            autocomplete="off"
+            class="w-full px-5 py-3.5 rounded-2xl bg-rosewood-950/90 border border-rosewood-400/40 text-center font-sans text-sm tracking-[0.2em] text-white placeholder-rose-300/40 focus:outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20 transition"
+          />
+          <button 
+            type="button" 
+            onclick="togglePasswordVisibility()" 
+            class=" right-4 top-1/2 -translate-y-1/2 text-rose-300/50 hover:text-rose-200 text-xs font-sans uppercase tracking-wider"
+            id="show-hide-btn"
+          >
+            Show
+          </button>
+        </div>
+
+        <p id="error-msg" class="text-rose-400 font-sans text-xs tracking-wide hidden">
+          Incorrect code. Only Nidhi &amp; Ava hold the key.
+        </p>
+
+        <button 
+          type="submit" 
+          class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-rosewood-500 via-rose-500 to-rosewood-500 hover:from-rose-500 hover:to-rosewood-400 text-white font-sans font-medium text-xs uppercase tracking-[0.25em] shadow-lg shadow-rosewood-500/30 transition duration-300 transform hover:-translate-y-0.5"
+        >
+          Unlock Article
+        </button>
+      </form>
+    </div>
+  </div>
+
   <!-- Floating Control Bar -->
-  <nav class="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-2.5 rounded-full glass-card font-sans text-xs tracking-wider uppercase text-rose-200/80">
+  <nav id="control-bar" class="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-2.5 rounded-full glass-card font-sans text-xs tracking-wider uppercase text-rose-200/80 opacity-0 pointer-events-none transition-opacity duration-700">
     <button onclick="adjustFontSize(-1)" class="hover:text-white px-2 py-1 transition" title="Decrease Font Size">A-</button>
     <span class="text-rosewood-500">|</span>
     <button onclick="adjustFontSize(1)" class="hover:text-white px-2 py-1 transition" title="Increase Font Size">A+</button>
@@ -130,9 +200,19 @@
     </button>
   </nav>
 
-  <!-- Main Story Container -->
-  <main class="relative z-10 max-w-3xl mx-auto px-5 sm:px-8 pt-16 pb-28">
+  <!-- Main Story Container (Blurred & Locked until Passcode Entered) -->
+  <main id="main-story" class="relative z-10 max-w-3xl mx-auto px-5 sm:px-8 pt-16 pb-28 blur-xl opacity-20 pointer-events-none transition-all duration-1000">
     
+    <!-- Special Welcome Dedication Banner -->
+    <div class="mb-10 p-5 rounded-2xl glass-card border border-rose-400/30 text-center reveal active">
+      <p class="font-sans text-[11px] uppercase tracking-[0.3em] text-rose-300/70 mb-1">
+        ✦ Exclusive Access Granted ✦
+      </p>
+      <p class="font-display italic text-xl sm:text-2xl text-rose-100">
+        Dedicated strictly to <span class="text-rose-300 font-semibold not-italic">NIDHI</span> &amp; <span class="text-rose-300 font-semibold not-italic">AVA</span> — sit back, relax, and enjoy every word.
+      </p>
+    </div>
+
     <!-- Story Header -->
     <header class="text-center mb-14 reveal active">
       <p class="font-script text-3xl sm:text-4xl text-rosewood-300 mb-2 tracking-wide">
@@ -336,6 +416,48 @@
   </main>
 
   <script>
+    // 0. Passcode Unlock Logic (Code: "shity")
+    const SECRET_CODE = 'shity';
+    const lockScreen = document.getElementById('lock-screen');
+    const lockCard = document.getElementById('lock-card');
+    const passcodeInput = document.getElementById('passcode-input');
+    const errorMsg = document.getElementById('error-msg');
+    const mainStory = document.getElementById('main-story');
+    const controlBar = document.getElementById('control-bar');
+    const pageBody = document.getElementById('page-body');
+
+    function unlockStory(e) {
+      e.preventDefault();
+      const entered = passcodeInput.value.trim().toLowerCase();
+
+      if (entered === SECRET_CODE) {
+        errorMsg.classList.add('hidden');
+        lockScreen.classList.add('opacity-0', 'pointer-events-none', 'scale-105');
+        mainStory.classList.remove('blur-xl', 'opacity-20', 'pointer-events-none');
+        controlBar.classList.remove('opacity-0', 'pointer-events-none');
+        pageBody.classList.remove('overflow-hidden');
+        handleScroll();
+      } else {
+        errorMsg.classList.remove('hidden');
+        lockCard.classList.remove('shake');
+        void lockCard.offsetWidth; // trigger reflow
+        lockCard.classList.add('shake');
+        passcodeInput.value = '';
+        passcodeInput.focus();
+      }
+    }
+
+    function togglePasswordVisibility() {
+      const btn = document.getElementById('show-hide-btn');
+      if (passcodeInput.type === 'password') {
+        passcodeInput.type = 'text';
+        btn.textContent = 'Hide';
+      } else {
+        passcodeInput.type = 'password';
+        btn.textContent = 'Show';
+      }
+    }
+
     // 1. Scroll Progress Bar & Reveal Animations
     const progressBar = document.getElementById('progress-bar');
     const reveals = document.querySelectorAll('.reveal');
@@ -343,7 +465,7 @@
     function handleScroll() {
       const scrollTop = window.scrollY;
       const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = (scrollTop / docHeight) * 100;
+      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
       progressBar.style.width = `${progress}%`;
 
       reveals.forEach((el) => {
@@ -355,7 +477,10 @@
     }
 
     window.addEventListener('scroll', handleScroll);
-    window.addEventListener('load', handleScroll);
+    window.addEventListener('load', () => {
+      passcodeInput.focus();
+      handleScroll();
+    });
 
     // 2. Dynamic Font Size Controls
     let currentScale = 1;
@@ -378,7 +503,7 @@
         : '0 25px 60px -15px rgba(0, 0, 0, 0.85)';
     }
 
-    // 4. Floating Romantic Embers / Rose Petals Canvas
+    // 4. Floating Romantic Embers Canvas
     const ctx = canvasEl.getContext('2d');
     let particles = [];
 
